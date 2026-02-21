@@ -181,11 +181,11 @@ def getRandomeUserAgent():
 
 # This method is for chrome driver initialization. You can customize if you want.
 def setDriver():
-    # 1. تثبيت الـ User-Agent على أندرويد بدلاً من العشوائي
+    # 1. download user agent
     user_agent = "Mozilla/5.0 (Linux; Android 10; SM-A205U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Mobile Safari/537.36"
     print(f"Using Android User-Agent: {user_agent}")
 
-    # 2. إعداد خيارات الكروم (زي ما هي عندك)
+    # 2. set chrome options
     options = ChromeOptions()
     
     prefs = {"profile.password_manager_enabled": False, "credentials_enable_service": False, "useAutomationExtension": False}
@@ -202,10 +202,10 @@ def setDriver():
     options.add_argument('--ignore-certificate-errors')
     options.add_argument(f"user-agent={user_agent}")
 
-    # 3. تشغيل الدرايفر
+    # 3. initialize the driver
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
     
-    # 4. إجبار المتصفح على أبعاد شاشة الموبايل (مهم جداً مع الـ User Agent الجديد)
+    # 4. set window size to mobile view (to bypass google bot detection)
     driver.set_window_size(360, 740) 
     
     return driver
@@ -365,24 +365,24 @@ def main():
                 day_field = WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.XPATH, SELECTORS['acc_day'])))
                 day_field.send_keys(birthday.split('/')[1])
                 
-                # 2. Month (الضغط بمحاكاة الماوس الحقيقي)
+                # 2. Month by moving mouse and click (to bypass google bot detection, because google can easily detect if we use send_keys for month selection)
                 month_element = driver.find_element(By.XPATH, SELECTORS['acc_month'])
                 actions = ActionChains(driver)
-                actions.move_to_element(month_element).click().perform() # دي حركة ماوس حقيقية
+                actions.move_to_element(month_element).click().perform() # move mouse to month selection and click
                 time.sleep(1)
-                # نكتب الشهر (أو رقم الشهر)
+                # write month num
                 actions.send_keys(birthday.split('/')[0]).send_keys(Keys.ENTER).perform()
 
                 # 3. Year
                 driver.find_element(By.XPATH, SELECTORS['acc_year']).send_keys(birthday.split('/')[2])
 
-                # 4. Gender (نفس حركة الماوس)
+                # 4. Gender by monving mouse and click
                 gender_element = driver.find_element(By.XPATH, SELECTORS['acc_gender'])
                 actions.move_to_element(gender_element).click().perform()
                 time.sleep(1)
                 actions.send_keys("M").send_keys(Keys.ENTER).perform()
 
-                # 5. Next (ضغط إجباري)
+                # 5. Next by moving mouse and click
                 for selector in SELECTORS['next']:
                     try:
                         btn = driver.find_element(By.XPATH, selector)
